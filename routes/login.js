@@ -2,7 +2,11 @@ const express = require("express");
 const asyncMySQL = require("../mysql/connection");
 const sha256 = require("sha256");
 const { generateToken } = require("../util");
-const { selectUserID, insertUserToLogin } = require("../mysql/queries");
+const {
+  selectUserID,
+  insertUserToLogin,
+  selectBJResults,
+} = require("../mysql/queries");
 const admin = require("firebase-admin");
 
 const router = express.Router();
@@ -16,23 +20,23 @@ async function handleUserLogin(req, res) {
     const hashedPassword = hashPassword(password);
 
     const users = await asyncMySQL(selectUserID(), [username, hashedPassword]);
+    const results = await asyncMySQL(selectBJResults(), [username]);
+    const avatars = await asyncMySQL(`SELECT avatar_id FROM casino_user_collection WHERE username = ?`, [username]);
 
     if (users.length === 0) {
       return sendResponse(res, 0);
     }
 
     const token = generateToken(50);
-
-    const firebaseToken = await admin
-      .auth()
-      .createCustomToken(users[0].user_id.toString());
+    const firebaseToken = await admin.auth().createCustomToken(users[0].user_id.toString());
 
     const chips = users[0].chips;
+    const avatar = users[0].avatar;
 
     const isSuccess = await loginUser(users[0].user_id, token);
 
     if (isSuccess) {
-      return sendResponse(res, 1, token, firebaseToken, chips);
+      return sendResponse(res, 1, token, firebaseToken, chips, avatar, results, null, avatars);
     } else {
       return sendResponse(res, 0, null, null, "Did not work");
     }
@@ -52,16 +56,19 @@ function sendResponse(
   token = null,
   firebaseToken = null,
   chips,
-  error = null
+  avatar,
+  results,
+  error = null,
+  avatars = []
 ) {
   if (token && firebaseToken) {
     res.cookie("token", token, {
       // httpOnly: true,
-      // secure: true, 
+      // secure: true,
       sameSite: "strict",
     });
 
-    res.send({ status, firebaseToken, chips });
+    res.send({ status, firebaseToken, chips, avatar, results, avatars });
   } else {
     res.send({ status, error });
   }

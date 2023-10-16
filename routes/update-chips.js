@@ -3,12 +3,11 @@ const asyncMySQL = require("../mysql/connection");
 const { updateChipsByUser } = require("../mysql/queries");
 const router = express.Router();
 
-router.post("/", handleUpdateChips);
+router.put("/", handleUpdateChips);
 
 async function handleUpdateChips(req, res) {
+  
   const { newChipCount, username } = req.body;
-  console.log(newChipCount, username);
-
 
   if (isInvalidData(newChipCount, username)) {
     return sendResponse(res, 0, "Invalid Data");
@@ -22,7 +21,7 @@ async function handleUpdateChips(req, res) {
 }
 
 function isInvalidData(chips, username) {
-  return !chips || !username;
+  return chips === undefined || chips === null || !username;
 }
 
 function sendResponse(res, status, error = null) {

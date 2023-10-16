@@ -29,5 +29,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "sha256": "^0.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

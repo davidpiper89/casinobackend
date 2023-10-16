@@ -12,7 +12,7 @@ module.exports = {
     (?, ?)`;
   },
   selectUserID: () => {
-    return `SELECT user_id, chips FROM casino_users
+    return `SELECT user_id, chips, avatar FROM casino_users
                  WHERE username = ? 
                  AND password = ?;`;
   },
@@ -28,5 +28,9 @@ module.exports = {
   },
   updateChipsByUser: () => {
     return `UPDATE casino_users SET chips = ? WHERE username = ?`;
+  },
+  selectBJResults: () => {
+    return `SELECT casino_blackjack_wins, casino_blackjack_loses, casino_blackjack_draws FROM casino_results
+            WHERE username = ?`;
   },
 };

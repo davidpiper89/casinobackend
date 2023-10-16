@@ -1,7 +1,15 @@
 const asyncMySQL = require("../mysql/connection");
 
 const auth = async (req, res, next) => {
-  const token = req.cookies.token;
+  const bearerHeader = req.headers.authorization;
+
+  if (!bearerHeader) {
+    return res
+      .status(400)
+      .send({ error: "Authorization header not provided." });
+  }
+
+  const token = bearerHeader.split(" ")[1];
 
   if (!token) {
     return res.status(400).send({ error: "Token not provided." });
@@ -12,7 +20,6 @@ const auth = async (req, res, next) => {
       `SELECT count(*) AS count, user_id FROM casino_logins WHERE token= ? ;`,
       [token]
     );
-
     req.user_id = results[0].user_id;
 
     if (results[0].count === 1) {

@@ -34,6 +34,16 @@ app.use("/google-login", require("./routes/google-login.js"));
 
 //sub routes need auth
 app.use("/update-chips", auth, require("./routes/update-chips"));
+app.use("/update-password", auth, require("./routes/update-password"));
+app.use("/update-username", auth, require("./routes/update-username")); 
+app.use("/update-avatars", auth, require("./routes/update-avatars"));
+app.use("/get-avatars", auth, require("./routes/get-avatars"));
+app.use("/set-avatar", auth, require("./routes/set-avatar"));
+app.use(
+  "/update-blackjack-results",
+  auth,
+  require("./routes/update-blackjack-results")
+);
 
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
