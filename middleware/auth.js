@@ -1,4 +1,5 @@
 const asyncMySQL = require("../mysql/connection");
+const { selectUserCount } = require("../mysql/queries");
 
 const auth = async (req, res, next) => {
   const bearerHeader = req.headers.authorization;
@@ -16,10 +17,7 @@ const auth = async (req, res, next) => {
   }
 
   try {
-    const results = await asyncMySQL(
-      `SELECT count(*) AS count, user_id FROM casino_logins WHERE token= ? ;`,
-      [token]
-    );
+    const results = await asyncMySQL(selectUserCount(), [token]);
     req.user_id = results[0].user_id;
 
     if (results[0].count === 1) {

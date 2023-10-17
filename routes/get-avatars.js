@@ -1,16 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const asyncMySQL = require("../mysql/connection");
+const { selectAvatars } = require("../mysql/queries");
 
 router.get("/:username", async (req, res) => {
   const username = req.params.username;
 
-
   try {
-    const avatars = await asyncMySQL(
-      `SELECT avatar_id FROM casino_user_collection WHERE username = ?`,
-      [username]
-    );
+    const avatars = await asyncMySQL(selectAvatars(), [username]);
 
     res.send({ success: true, avatars });
   } catch (error) {
@@ -20,4 +17,3 @@ router.get("/:username", async (req, res) => {
 });
 
 module.exports = router;
- 

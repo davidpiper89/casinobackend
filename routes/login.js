@@ -3,9 +3,10 @@ const asyncMySQL = require("../mysql/connection");
 const sha256 = require("sha256");
 const { generateToken } = require("../util");
 const {
-  selectUserID,
+  selectUserIDChipsAvatar,
   insertUserToLogin,
   selectBJResults,
+  selectAvatars,
 } = require("../mysql/queries");
 const admin = require("firebase-admin");
 
@@ -19,16 +20,18 @@ async function handleUserLogin(req, res) {
   try {
     const hashedPassword = hashPassword(password);
 
-    const users = await asyncMySQL(selectUserID(), [username, hashedPassword]);
+    const users = await asyncMySQL(selectUserIDChipsAvatar(), [username, hashedPassword]);
     const results = await asyncMySQL(selectBJResults(), [username]);
-    const avatars = await asyncMySQL(`SELECT avatar_id FROM casino_user_collection WHERE username = ?`, [username]);
+    const avatars = await asyncMySQL(selectAvatars(), [username]);
 
     if (users.length === 0) {
       return sendResponse(res, 0);
     }
 
     const token = generateToken(50);
-    const firebaseToken = await admin.auth().createCustomToken(users[0].user_id.toString());
+    const firebaseToken = await admin
+      .auth()
+      .createCustomToken(users[0].user_id.toString());
 
     const chips = users[0].chips;
     const avatar = users[0].avatar;
@@ -36,7 +39,17 @@ async function handleUserLogin(req, res) {
     const isSuccess = await loginUser(users[0].user_id, token);
 
     if (isSuccess) {
-      return sendResponse(res, 1, token, firebaseToken, chips, avatar, results, null, avatars);
+      return sendResponse(
+        res,
+        1,
+        token,
+        firebaseToken,
+        chips,
+        avatar,
+        results,
+        null,
+        avatars
+      );
     } else {
       return sendResponse(res, 0, null, null, "Did not work");
     }

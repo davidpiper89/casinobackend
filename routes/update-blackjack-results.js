@@ -1,6 +1,7 @@
 const express = require("express");
 const asyncMySQL = require("../mysql/connection");
 const router = express.Router();
+const { setCasinoResults } = require("../mysql/queries");
 
 router.put("/:username", async (req, res) => {
   const { username } = req.params;
@@ -20,17 +21,12 @@ router.put("/:username", async (req, res) => {
 
       const userId = userIdResult[0].user_id;
 
-      const query = `
-                INSERT INTO casino_results (username, user_id, casino_blackjack_${resultType}s)
-                VALUES (?, ?, 1)
-                ON DUPLICATE KEY UPDATE casino_blackjack_${resultType}s = casino_blackjack_${resultType}s + 1
-            `;
+      const query = setCasinoResults(resultType);
       await asyncMySQL(query, [username, userId]);
 
       res
         .status(200)
         .send({ message: "Blackjack results updated successfully." });
-
     } catch (error) {
       console.error("Database error:", error);
       res.status(500).send({ status: 0, error: "Internal server error" });

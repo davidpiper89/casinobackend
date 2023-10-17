@@ -1,7 +1,11 @@
 const express = require("express");
 const asyncMySQL = require("../mysql/connection");
 const sha256 = require("sha256");
-const { insertUser } = require("../mysql/queries");
+const {
+  insertUser,
+  selectUserCountFromUsername,
+  selectUserCountFromEmail,
+} = require("../mysql/queries");
 
 const router = express.Router();
 
@@ -63,13 +67,13 @@ async function registerUser(username, hashedPassword, email) {
 }
 
 async function userExists(username) {
-  const query = "SELECT COUNT(*) as count FROM casino_users WHERE username = ?";
+  const query = selectUserCountFromUsername();
   const result = await asyncMySQL(query, [username]);
   return result[0].count > 0;
 }
 
 async function emailExists(email) {
-  const query = "SELECT COUNT(*) as count FROM casino_users WHERE email = ?";
+  const query = selectUserCountFromEmail();
   const result = await asyncMySQL(query, [email]);
   return result[0].count > 0;
 }

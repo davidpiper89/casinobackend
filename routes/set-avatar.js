@@ -1,22 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const asyncMySQL = require("../mysql/connection");
-
+const { setAvatar } = require("../mysql/queries");
 router.post("/:username", async (req, res) => {
   const username = req.params.username;
   const avatar = req.body.avatar;
-
-
 
   if (!avatar) {
     return res.status(400).send({ status: 0, error: "Avatar not provided." });
   }
 
   try {
-    const result = await asyncMySQL(
-      "UPDATE casino_users SET avatar = ? WHERE username = ?",
-      [avatar, username]
-    );
+    const result = await asyncMySQL(setAvatar(), [avatar, username]);
 
     if (result.affectedRows === 1) {
       res.send({ status: 1, message: "Avatar updated successfully." });
